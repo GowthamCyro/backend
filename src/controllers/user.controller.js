@@ -6,13 +6,13 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 
 const generateAccessAndRefreshTokens = async(user) => {
     try {
-        const accessToken = await user.generateAccessToken;
-        const refreshToken = await user.generateRefreshToken;
+        const accessToken = await user.generateAccessToken();
+        const refreshToken = await user.generateRefreshToken();
 
         user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave : false })
 
-        return {accessToken,refreshToken,user}
+        return {accessToken,refreshToken}
 
     } catch (error) {
         throw new ApiError(500,"Something went wrong while generating tokens")
@@ -89,8 +89,6 @@ const registerUser = asyncHandler( async (req,res) => {
     return res.status(201).json(
         new ApiResponse(200,createdUser,"User Registered Successfully")
     )
-
-
 })
 
 const loginUser = asyncHandler( async(req,res) => {
@@ -101,10 +99,10 @@ const loginUser = asyncHandler( async(req,res) => {
     // if your exists generate a access token and refresh token for the user and return access token
     // if not exists throw Api Error usernot exists or password not match with the username
 
-    const {username,email,password} = req.body;
+    const {username,email,password} = req.body
 
-    if(!(username || email)){
-        throw new ApiErrorError(404,"Username or Email should not be empty");
+    if(!email && !username){
+        throw new ApiError(404,"Username or Email should not be empty");
     }
 
     const user = await User.findOne({$or:[{username},{email}]})
@@ -119,9 +117,10 @@ const loginUser = asyncHandler( async(req,res) => {
         throw new ApiError(401,"Invalid user credentials");
     }
 
-    const {accessToken,refreshToken,updated_user} = await generateAccessAndRefreshTokens(user);
+    const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user);
 
-    const loggedInUser = updated_user.select("-password -refreshToken");
+
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
     const options = {  // using for cookies
         httpOnly : true,
@@ -145,7 +144,7 @@ const loginUser = asyncHandler( async(req,res) => {
 })
 
 const logoutUser = asyncHandler( async(req,res) =>{
-    await User.findByIdAndUpdate(req.us._id,
+    await User.findByIdAndUpdate(req.user._id,
         {
             $set : {
                 refreshToken : undefined
@@ -168,8 +167,6 @@ const logoutUser = asyncHandler( async(req,res) =>{
     .clearCookie("refreshToken",options)
     .json(new ApiResponse(200, {}, "User Logged Out Successfully" ))
 })
-
-
 
 export {
     registerUser,
