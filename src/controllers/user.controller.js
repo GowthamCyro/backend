@@ -5,8 +5,9 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken";
 
-const generateAccessAndRefreshTokens = async(user) => {
+const generateAccessAndRefreshTokens = async(userId) => {
     try {
+        const user = await User.findById(userId);
         const accessToken = await user.generateAccessToken();
         const refreshToken = await user.generateRefreshToken();
 
@@ -118,7 +119,7 @@ const loginUser = asyncHandler( async(req,res) => {
         throw new ApiError(401,"Invalid user credentials");
     }
 
-    const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user);
+    const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user._id);
 
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
@@ -195,8 +196,10 @@ const refreshAccessToken = asyncHandler( async(req,res) => {
             secure : true
         }
     
-        const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user);
-    
+        const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user._id);
+        
+        console.log(refreshToken);
+
         return res
         .status(200)
         .cookie("accessToken",accessToken,options)
@@ -205,7 +208,7 @@ const refreshAccessToken = asyncHandler( async(req,res) => {
             new ApiResponse(
                 200,
                 {
-                
+                    accessToken
                 },
                 "New tokens generated"
             )
