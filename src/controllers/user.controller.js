@@ -152,7 +152,6 @@ const logoutUser = asyncHandler( async(req,res) =>{
             $unset : {
                 refreshToken : 1
             } 
-            
         },
         {
             new : true
@@ -404,7 +403,7 @@ const getUserChannelProfile = asyncHandler( async(req,res) => {
         throw new ApiError(404,"channel does not exist")
     }
 
-    console.log(channel);
+    // console.log(channel);
 
     return res
     .status(200)
