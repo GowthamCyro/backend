@@ -283,6 +283,8 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
         throw new ApiError(401,"something went wrong while uploading on cloudinary");
     }
 
+    // TODO delete old image in cloudinary
+
     const user = await User.findByIdAndDelete(
         req.user?._id,
         {
@@ -312,6 +314,8 @@ const updateUserCoverImage = asyncHandler(async(req,res)=>{
     if(!coverImage){
         throw new ApiError(401,"something went wrong while uploading on cloudinary");
     }
+
+    // TODO delete old image in cloudinary
 
     const user = await User.findByIdAndDelete(
         req.user?._id,
