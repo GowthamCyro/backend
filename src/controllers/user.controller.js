@@ -271,7 +271,7 @@ const updateAccountDetails = asyncHandler(async(req,res) => {
 })
 
 const updateUserAvatar = asyncHandler(async(req,res)=>{
-    const avatarFilePath = req.files?.avatar[0]?.path;
+    const avatarFilePath = req.file?.path;
 
     if(!avatarFilePath){
         throw new ApiError(401,"Image not Found");
@@ -303,7 +303,7 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
 })
 
 const updateUserCoverImage = asyncHandler(async(req,res)=>{
-    const coverImageFilePath = req.file?.coverImage[0]?.path;
+    const coverImageFilePath = req.file?.path;
 
     if(!coverImageFilePath){
         throw new ApiError(401,"Image not Found");
